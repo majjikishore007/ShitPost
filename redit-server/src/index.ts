@@ -1,15 +1,15 @@
-import "reflect-metadata"
-import { MikroORM } from '@mikro-orm/core'
-import { __prod__ } from './constants';
-import microConfig from './mikro-orm.config'
-import express from 'express'
-import {ApolloServer} from 'apollo-server-express'
-import { buildSchema } from 'type-graphql';
-import { HelloResolver } from './resolvers/hello';
+import "reflect-metadata";
+import { MikroORM } from "@mikro-orm/core";
+import { __prod__ } from "./constants";
+import microConfig from "./mikro-orm.config";
+import express from "express";
+import { ApolloServer } from "apollo-server-express";
+import { buildSchema } from "type-graphql";
+import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import cors from "cors";
-import redis from "redis";
+import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 
@@ -26,30 +26,20 @@ const main = async () => {
   // const data = await orm.em.find(Post, {});
 
   const app = express();
-
+  const RedisStore = connectRedis(session);
+  const redis = new Redis();
+  redis.set("congo", "connected");
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: "http://localhost:3000/",
       credentials: true,
     })
   );
-
-  let RedisStore = connectRedis(session);
-  const redisClient = await redis.createClient();
-  // await redisClient.connect();
-  // const RedisStore = connectRedis(session);
-  // const redisClient = redis.createClient();
-  // await redisClient.connect();
-  // redisClient.on("error", (err) => console.log("Redis Client Error", err));
-  // await redisClient.set("key", "connected success");
-  // const value = await redisClient.get("key");
-  // console.log("Redis value ::::::::::::::::::::::::", value);
-
   app.use(
     session({
       name: "qid",
       store: new RedisStore({
-        client: redisClient,
+        client: redis,
         disableTouch: true,
       }),
       cookie: {
@@ -85,6 +75,5 @@ const main = async () => {
 };
 
 main().catch((err) => {
-    console.log(err);
-    
+  console.log(err);
 });
