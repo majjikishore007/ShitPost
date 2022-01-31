@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
-import { __prod__ } from "./constants";
+import { COOKIE_NAME, __prod__ } from "./constants";
 import microConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
@@ -28,7 +28,12 @@ const main = async () => {
   const app = express();
   const RedisStore = connectRedis(session);
   const redis = new Redis();
-  redis.set("congo", "connected");
+  redis.set("congo", "connectRedis");
+  console.log(
+    "yay! your redis successfully connected",
+    await redis.get("congo")
+  );
+
   app.use(
     cors({
       origin: "http://localhost:3000/",
@@ -37,7 +42,7 @@ const main = async () => {
   );
   app.use(
     session({
-      name: "qid",
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redis,
         disableTouch: true,
@@ -66,9 +71,7 @@ const main = async () => {
     app,
     cors: false,
   });
-  app.get("/", (req, res) => {
-    res.send("hello");
-  });
+
   app.listen(4000, () => {
     console.log("server is listening on port 4000");
   });

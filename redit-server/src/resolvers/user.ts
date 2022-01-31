@@ -8,8 +8,10 @@ import {
   Arg,
   Ctx,
   ObjectType,
+  Query,
 } from "type-graphql";
 import argon2 from "argon2";
+import { COOKIE_NAME } from "../constants";
 
 @InputType()
 class UsernamePasswordInput {
@@ -37,10 +39,32 @@ class UserResponse {
 }
 @Resolver()
 export class UserResolver {
+  /**
+   *
+   * @param req.session.userId
+   * @returns  user | null
+   * @description This query checks for a user in the session anb returns the user
+   */
+  @Query(() => User, { nullable: true })
+  me(@Ctx() { req, em }: MyContext) {
+    // you are not logged in
+    if (!req.session.userId) {
+      return null;
+    }
+    const user = em.findOne(User, { id: req.session.userId });
+    return user;
+  }
+
+  /**
+   *
+   * @param username
+   * @param password
+   * @returns The user if does not exist
+   */
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { req, em }: MyContext
   ): Promise<UserResponse> {
     //password length validation
     if (options.username.length <= 2) {
@@ -81,11 +105,18 @@ export class UserResolver {
       password: hashedPassword,
     });
     await em.persistAndFlush(user);
+
+    req.session.userId = user.id;
     return {
       user,
     };
   }
-
+  /**
+   *
+   * @param username
+   * @param password
+   * @returns creates a session for the user if the entered credentials are valid
+   */
   @Mutation(() => UserResponse)
   async login(
     @Arg("options") options: UsernamePasswordInput,
@@ -115,11 +146,26 @@ export class UserResolver {
         ],
       };
     }
-    console.log("session::::::::: ", req.session);
-
+    // setting the user cookie in the express session
     req.session.userId = user.id;
     return {
       user,
     };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: MyContext) {
+    new Promise((resolve) => {
+      req.session.destroy((err) => {
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+      });
+    });
+
+    res.clearCookie(COOKIE_NAME);
+    return true;
   }
 }

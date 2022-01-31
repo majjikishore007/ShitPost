@@ -1,5 +1,5 @@
-quey Me{
-    me{
-        ...RegularUserResponse
-    }
+query Me {
+  me {
+    ...RegularUser
+  }
 }
