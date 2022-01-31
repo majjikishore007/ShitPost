@@ -1,0 +1,5 @@
+quey Me{
+    me{
+        ...RegularUserResponse
+    }
+}
