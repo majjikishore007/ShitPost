@@ -1,57 +1,54 @@
 import { Box, Button } from "@chakra-ui/react";
-import { Formik, Form } from "formik";
+import { Form, Formik } from "formik";
 import { useRouter } from "next/router";
 import React from "react";
-import { InputField } from "../components/InputFiled";
+import { InputFiled } from "../components/InputFiled";
 import { Wrapper } from "../components/Wrapper";
 import { useRegisterMutation } from "../generated/graphql";
 import { toErrorMap } from "../utils/toErrorMap";
 
-interface registerProps {
-  username: string;
-  password: string;
-}
+interface registerProps {}
 
 const Register: React.FC<registerProps> = ({}) => {
   const router = useRouter();
   const [, register] = useRegisterMutation();
   return (
-    <Wrapper variant='small'>
+    <Wrapper variant={"small"}>
       <Formik
         initialValues={{ username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
+          console.log("Values ", values);
           const response = await register(values);
+          console.log(response);
+
           if (response.data?.register.errors) {
             setErrors(toErrorMap(response.data.register.errors));
           } else if (response.data?.register.user) {
-            // everything is working fine
             router.push("/");
           }
         }}
       >
         {({ isSubmitting }) => (
           <Form>
-            <InputField
-              name='username'
+            <InputFiled
               label='username'
+              name='username'
               placeholder='username'
-              type='username'
-            />
+            ></InputFiled>
             <Box mt={4}>
-              <InputField
-                name='password'
+              <InputFiled
                 label='password'
+                name='password'
                 placeholder='password'
-                type='password'
-              />
+              ></InputFiled>
             </Box>
             <Button
+              isLoading={isSubmitting}
               mt={4}
               colorScheme='teal'
-              type='submit'
-              isLoading={isSubmitting}
+              type={"submit"}
             >
-              Register
+              Submit
             </Button>
           </Form>
         )}

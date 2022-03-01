@@ -122,6 +122,8 @@ export class UserResolver {
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
+    console.log("Cheching ", options);
+    
     const user = await em.findOne(User, { username: options.username });
     if (!user) {
       return {
