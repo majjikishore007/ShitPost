@@ -1,7 +1,6 @@
 import { User } from "../entities/User";
 import { MyContext } from "src/types";
 import {
-  InputType,
   Mutation,
   Resolver,
   Field,
@@ -12,14 +11,8 @@ import {
 } from "type-graphql";
 import argon2 from "argon2";
 import { COOKIE_NAME } from "../constants";
-
-@InputType()
-class UsernamePasswordInput {
-  @Field()
-  username: string;
-  @Field()
-  password: string;
-}
+import { UsernamePasswordInput } from "./UsernamePasswordInput";
+import { validateRegister } from "../utils/ValidationsRegister";
 
 @ObjectType()
 class FieldError {
@@ -32,19 +25,14 @@ class FieldError {
 @ObjectType()
 class UserResponse {
   @Field(() => [FieldError], { nullable: true }) //explicitly define the types if we want nullable
-  errors?: FieldError[];
+  errors?: FieldError[]; //? for nullable
 
   @Field(() => User, { nullable: true })
   user?: User;
 }
+
 @Resolver()
 export class UserResolver {
-  /**
-   *
-   * @param req.session.userId
-   * @returns  user | null
-   * @description This query checks for a user in the session anb returns the user
-   */
   @Query(() => User, { nullable: true })
   me(@Ctx() { req, em }: MyContext) {
     // you are not logged in
@@ -55,46 +43,25 @@ export class UserResolver {
     return user;
   }
 
-  /**
-   *
-   * @param username
-   * @param password
-   * @returns The user if does not exist
-   */
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: UsernamePasswordInput,
     @Ctx() { req, em }: MyContext
   ): Promise<UserResponse> {
-    //password length validation
-    if (options.username.length <= 2) {
+    const errors = validateRegister(options);
+    if (errors) {
       return {
-        errors: [
-          {
-            field: "username",
-            message: "username must be at least 2 characters",
-          },
-        ],
-      };
-    }
-    if (options.password.length < 3) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "password must be at least 3 characters",
-          },
-        ],
+        errors,
       };
     }
     //user duplication validation
-    const userExists = await em.findOne(User, { username: options.username });
+    const userExists = await em.findOne(User, { email: options.email });
     if (userExists) {
       return {
         errors: [
           {
             field: "username",
-            message: "user already exists please log in",
+            message: "user already exists please login",
           },
         ],
       };
@@ -102,6 +69,7 @@ export class UserResolver {
     const hashedPassword = await argon2.hash(options.password);
     const user = em.create(User, {
       username: options.username,
+      email: options.email,
       password: hashedPassword,
     });
     await em.persistAndFlush(user);
@@ -111,31 +79,32 @@ export class UserResolver {
       user,
     };
   }
-  /**
-   *
-   * @param username
-   * @param password
-   * @returns creates a session for the user if the entered credentials are valid
-   */
+
   @Mutation(() => UserResponse)
   async login(
-    @Arg("options") options: UsernamePasswordInput,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    console.log("Cheching ", options);
-    
-    const user = await em.findOne(User, { username: options.username });
+    console.log("Cheching ", usernameOrEmail);
+
+    const user = await em.findOne(
+      User,
+      usernameOrEmail.includes("@")
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail }
+    );
     if (!user) {
       return {
         errors: [
           {
-            field: "username",
+            field: "usernameOrEmail",
             message: "User does not exist !",
           },
         ],
       };
     }
-    const vaild = await argon2.verify(user.password, options.password);
+    const vaild = await argon2.verify(user.password, password);
     if (!vaild) {
       console.log("Password verification");
 
