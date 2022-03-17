@@ -12,12 +12,10 @@ import cors from "cors";
 import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
-import { sendMail } from "./utils/sendEmail";
 
 //expirement
 
 const main = async () => {
-  // sendMail("majji@dev.com", "hello");
   const orm = await MikroORM.init(microConfig);
   //making migrations up
   await orm.getMigrator().up();
@@ -66,7 +64,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res }),
+    context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
   });
   await apolloServer.start();
   apolloServer.applyMiddleware({

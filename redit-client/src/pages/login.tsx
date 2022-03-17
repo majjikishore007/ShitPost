@@ -1,27 +1,28 @@
-import { Box, Button } from "@chakra-ui/react";
-import { Form, Formik } from "formik";
-import { withUrqlClient } from "next-urql";
-import { useRouter } from "next/router";
-import React from "react";
-import { InputFiled } from "../components/InputFiled";
-import { Wrapper } from "../components/Wrapper";
-import { useLoginMutation } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClinet";
-import { toErrorMap } from "../utils/toErrorMap";
+import { Box, Button, Flex, Link } from '@chakra-ui/react';
+import { Form, Formik } from 'formik';
+import { withUrqlClient } from 'next-urql';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { InputFiled } from '../components/InputFiled';
+import { Wrapper } from '../components/Wrapper';
+import { useLoginMutation } from '../generated/graphql';
+import { createUrqlClient } from '../utils/createUrqlClinet';
+import { toErrorMap } from '../utils/toErrorMap';
+import NextLink from 'next/link';
 
 const Login: React.FC<{}> = ({}) => {
   const router = useRouter();
   const [, login] = useLoginMutation();
   return (
-    <Wrapper variant={"small"}>
+    <Wrapper variant={'small'}>
       <Formik
-        initialValues={{ usernameOrEmail: "", password: "" }}
+        initialValues={{ usernameOrEmail: '', password: '' }}
         onSubmit={async (values, { setErrors }) => {
           const response = await login(values);
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
-            router.push("/");
+            router.push('/');
           }
         }}
       >
@@ -40,11 +41,16 @@ const Login: React.FC<{}> = ({}) => {
                 type='password'
               ></InputFiled>
             </Box>
+            <Flex mt={2}>
+              <NextLink href={'/forgot-password'}>
+                <Link ml={'auto'}>Forgot password ?</Link>
+              </NextLink>
+            </Flex>
             <Button
               isLoading={isSubmitting}
               mt={4}
               colorScheme='teal'
-              type={"submit"}
+              type={'submit'}
             >
               Login
             </Button>

@@ -10,9 +10,11 @@ import {
   Query,
 } from "type-graphql";
 import argon2 from "argon2";
-import { COOKIE_NAME } from "../constants";
-import { UsernamePasswordInput } from "./UsernamePasswordInput";
-import { validateRegister } from "../utils/ValidationsRegister";
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
+import { UsernamePasswordInput } from './UsernamePasswordInput';
+import { validateRegister } from '../utils/ValidationsRegister';
+import { sendMail } from '../utils/sendEmail';
+import { v4 } from 'uuid';
 
 @ObjectType()
 class FieldError {
@@ -44,8 +46,82 @@ export class UserResolver {
   }
 
   @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg('token') token: string,
+    @Arg('newPassword') newPassword: string,
+    @Ctx() { em, redis ,req}: MyContext
+  ): Promise<UserResponse> {
+    if (newPassword.length <= 2) {
+      return {
+        errors: [
+          {
+            field: 'newPassword',
+            message: 'length must be greater than 2',
+          },
+        ],
+      };
+
+    }
+    const KEY = FORGET_PASSWORD_PREFIX + token;
+    const userId = await redis.get(KEY);
+    if (!userId) {
+      return {
+        errors: [
+          {
+            field: 'token',
+            message: 'token expired',
+          },
+        ],
+      };
+    }
+    const user = await em.findOne(User, { id: parseInt(userId) });
+    if (!user) {
+      return {
+        errors: [
+          {
+            field: 'token',
+            message: 'user no longer exists',
+          },
+        ],
+      };
+    }
+    user.password = await argon2.hash(newPassword);
+    await em.persistAndFlush(user);
+    await redis.del(KEY);
+    // login the user after chainging the password change
+    req.session.userId = user.id;
+    return { user };
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(
+    @Arg('email') email: string,
+    @Ctx() { em, redis }: MyContext
+  ) {
+    console.log("hiting the mutation");
+    
+    const user = await em.findOne(User, { email: email });
+    if (!user) {
+      return true;
+    }
+    const token = v4();
+
+    redis.set(
+      FORGET_PASSWORD_PREFIX + token,
+      user.id,
+      'ex',
+      1000 * 60 * 60 * 24 * 3
+    );
+    sendMail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}" >reset password</a>`
+    );
+    return true;
+  }
+
+  @Mutation(() => UserResponse)
   async register(
-    @Arg("options") options: UsernamePasswordInput,
+    @Arg('options') options: UsernamePasswordInput,
     @Ctx() { req, em }: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegister(options);
@@ -60,8 +136,8 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
-            message: "user already exists please login",
+            field: 'username',
+            message: 'user already exists please login',
           },
         ],
       };
@@ -82,15 +158,15 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("usernameOrEmail") usernameOrEmail: string,
-    @Arg("password") password: string,
+    @Arg('usernameOrEmail') usernameOrEmail: string,
+    @Arg('password') password: string,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    console.log("Cheching ", usernameOrEmail);
+    console.log('Cheching ', usernameOrEmail);
 
     const user = await em.findOne(
       User,
-      usernameOrEmail.includes("@")
+      usernameOrEmail.includes('@')
         ? { email: usernameOrEmail }
         : { username: usernameOrEmail }
     );
@@ -98,21 +174,21 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "usernameOrEmail",
-            message: "User does not exist !",
+            field: 'usernameOrEmail',
+            message: 'User does not exist !',
           },
         ],
       };
     }
     const vaild = await argon2.verify(user.password, password);
     if (!vaild) {
-      console.log("Password verification");
+      console.log('Password verification');
 
       return {
         errors: [
           {
-            field: "password",
-            message: "Password is incorrect !",
+            field: 'password',
+            message: 'Password is incorrect !',
           },
         ],
       };
