@@ -1,42 +1,44 @@
-import "reflect-metadata";
-import { MikroORM } from "@mikro-orm/core";
-import { COOKIE_NAME, __prod__ } from "./constants";
-import microConfig from "./mikro-orm.config";
-import express from "express";
-import { ApolloServer } from "apollo-server-express";
-import { buildSchema } from "type-graphql";
-import { HelloResolver } from "./resolvers/hello";
-import { PostResolver } from "./resolvers/post";
-import { UserResolver } from "./resolvers/user";
-import cors from "cors";
-import Redis from "ioredis";
-import session from "express-session";
-import connectRedis from "connect-redis";
+import { ApolloServer } from 'apollo-server-express';
+import connectRedis from 'connect-redis';
+import cors from 'cors';
+import express from 'express';
+import session from 'express-session';
+import Redis from 'ioredis';
+import 'reflect-metadata';
+import { buildSchema } from 'type-graphql';
+import { createConnection } from 'typeorm';
+import { COOKIE_NAME, __prod__ } from './constants';
+import { Post } from './entities/Post';
+import { User } from './entities/User';
+import { HelloResolver } from './resolvers/hello';
+import { PostResolver } from './resolvers/post';
+import { UserResolver } from './resolvers/user';
 
 //expirement
 
 const main = async () => {
-  const orm = await MikroORM.init(microConfig);
-  //making migrations up
-  await orm.getMigrator().up();
-
-  // const post =  orm.em.create(Post, {title:"My second post "});
-  // await orm.em.persistAndFlush(post)
-
-  // const data = await orm.em.find(Post, {});
+  await createConnection({
+    type: 'postgres',
+    database: 'redit2',
+    username: 'postgres',
+    password: 'psql',
+    logging: true,
+    synchronize: true,
+    entities: [Post, User],
+  });
 
   const app = express();
   const RedisStore = connectRedis(session);
   const redis = new Redis();
-  redis.set("congo", "connectRedis");
+  redis.set('congo', 'connectRedis');
   console.log(
-    "yay! your redis successfully connected",
-    await redis.get("congo")
+    'yay! your redis successfully connected',
+    await redis.get('congo')
   );
 
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: 'http://localhost:3000',
       credentials: true,
     })
   );
@@ -50,11 +52,11 @@ const main = async () => {
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 364 * 10, // 10 years
         httpOnly: true, // make the cookie unaccessible for the frontend
-        sameSite: "lax",
+        sameSite: 'lax',
         secure: __prod__, // for security
       },
       saveUninitialized: false,
-      secret: "hsdkhfjkahfdhasjhfjashdfjhalhhdhdq",
+      secret: 'hsdkhfjkahfdhasjhfjashdfjhalhhdhdq',
       resave: false,
     })
   );
@@ -64,7 +66,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
+    context: ({ req, res }) => ({ req, res, redis }),
   });
   await apolloServer.start();
   apolloServer.applyMiddleware({
@@ -73,7 +75,7 @@ const main = async () => {
   });
 
   app.listen(4000, () => {
-    console.log("server is listening on port 4000");
+    console.log('server is listening on port 4000');
   });
 };
 

@@ -14,60 +14,61 @@ import NextLink from 'next/link';
 const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   const router = useRouter();
   const [, changePassword] = useChangePasswordMutation();
-  const [tokenErrors, setTokenErrors] = useState('');
-  return (
-    <Wrapper variant='small'>
-      <Formik
-        initialValues={{ newPassword: '' }}
-        onSubmit={async (values, { setErrors }) => {
-          const response = await changePassword({
-            newPassword: values.newPassword,
-            token: token,
-          });
-          if (response.data?.changePassword.errors) {
-            const errorMap = toErrorMap(response.data.changePassword.errors);
-            console.log(errorMap.token);
+   const [tokenError, setTokenError] = useState('');
+   return (
+     <Wrapper variant='small'>
+       <Formik
+         initialValues={{ newPassword: '' }}
+         onSubmit={async (values, { setErrors }) => {
+           const response = await changePassword({
+             newPassword: values.newPassword,
+             token: token,
+           });
+           if (response.data?.changePassword.errors) {
+             const errorMap = toErrorMap(response.data.changePassword.errors);
+             if ('token' in errorMap) {
+               setTokenError(errorMap.token);
+             }
 
-            if ('token' in toErrorMap) {
-              setTokenErrors(errorMap.token);
-            }
-            console.log('token errors', tokenErrors);
-
-            setErrors(errorMap);
-          } else if (response.data?.changePassword.user) {
-            router.push('/');
-          }
-        }}
-      >
-        {({ isSubmitting }) => (
-          <Form>
-            <InputFiled
-              label='newPassword'
-              name='newPassword'
-              type='password'
-              placeholder='new Password'
-            ></InputFiled>
-            {tokenErrors ? (
-              <Flex>
-                <Box mr={2}>{tokenErrors}</Box>
-                <NextLink href={'/forgot-password'}>
-                  <Link>Click here to create a new password</Link>
-                </NextLink>
-              </Flex>
-            ) : null}
-            <Button
-              isLoading={isSubmitting}
-              mt={4}
-              colorScheme='teal'
-              type={'submit'}
-            >
-              Change Password
-            </Button>
-          </Form>
-        )}
-      </Formik>
-    </Wrapper>
-  );
+             setErrors(errorMap);
+           } else if (response.data?.changePassword.user) {
+             router.push('/');
+           }
+         }}
+       >
+         {({ isSubmitting }) => (
+           <Form>
+             <InputFiled
+               label='newPassword'
+               name='newPassword'
+               type='password'
+               placeholder='new Password'
+             ></InputFiled>
+             {tokenError ? (
+               <Flex>
+                 <Box style={{ color: 'red' }} mr={2}>
+                   {tokenError}
+                 </Box>
+                 <NextLink href={'/forgot-password'}>
+                   <Link color={'blue'}>
+                     Click here to create a new password
+                   </Link>
+                 </NextLink>
+               </Flex>
+             ) : null}
+             <Button
+               isLoading={isSubmitting}
+               mt={4}
+               colorScheme='teal'
+               type={'submit'}
+             >
+               Change Password
+             </Button>
+           </Form>
+         )}
+       </Formik>
+     </Wrapper>
+   );
 };
 
 ChangePassword.getInitialProps = ({ query }) => {
