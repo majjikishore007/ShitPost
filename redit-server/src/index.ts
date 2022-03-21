@@ -19,7 +19,7 @@ import { UserResolver } from './resolvers/user';
 const main = async () => {
   await createConnection({
     type: 'postgres',
-    database: 'redit2',
+    database: 'redit',
     username: 'postgres',
     password: 'psql',
     logging: true,

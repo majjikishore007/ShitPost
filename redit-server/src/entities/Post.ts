@@ -16,13 +16,22 @@ export class Post extends BaseEntity {
   @Field()
   @PrimaryGeneratedColumn()
   id!: number;
+
   @Field(() => String)
   @Column()
   title!: string;
 
+  @Field(() => String)
+  @Column()
+  text: string;
+
+  @Field(() => Number)
+  @Column({ type: 'int', default: 0 })
+  points: number;
+
   @Field()
   @Column()
-  createdId: number;
+  creatorId: number;
 
   @ManyToOne(() => User, (user) => user.posts)
   creator: User;

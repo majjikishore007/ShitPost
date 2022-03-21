@@ -1,14 +1,14 @@
 import { Box, Button, Flex, Link } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
 import { withUrqlClient } from 'next-urql';
+import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { InputFiled } from '../components/InputFiled';
+import { InputFeild } from '../components/InputFiled';
 import { Wrapper } from '../components/Wrapper';
 import { useLoginMutation } from '../generated/graphql';
 import { createUrqlClient } from '../utils/createUrqlClinet';
 import { toErrorMap } from '../utils/toErrorMap';
-import NextLink from 'next/link';
 
 const Login: React.FC<{}> = ({}) => {
   const router = useRouter();
@@ -22,24 +22,27 @@ const Login: React.FC<{}> = ({}) => {
           if (response.data?.login.errors) {
             setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
-            router.push('/');
+            if (typeof router.query.next === 'string') {
+              console.log(router);
+              router.push(router.query.next);
+            } else router.push('/');
           }
         }}
       >
         {({ isSubmitting }) => (
           <Form>
-            <InputFiled
+            <InputFeild
               label='usernameOrEmail'
               name='usernameOrEmail'
               type='username or email'
               placeholder='Username or email'
-            ></InputFiled>
+            ></InputFeild>
             <Box mt={4}>
-              <InputFiled
+              <InputFeild
                 label='password'
                 name='password'
                 type='password'
-              ></InputFiled>
+              ></InputFeild>
             </Box>
             <Flex mt={2}>
               <NextLink href={'/forgot-password'}>
