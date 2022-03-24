@@ -13,19 +13,20 @@ import { User } from './entities/User';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
-
-//expirement
+import path from 'path';
 
 const main = async () => {
-  await createConnection({
+  const connection = await createConnection({
     type: 'postgres',
     database: 'redit',
     username: 'postgres',
     password: 'psql',
     logging: true,
     synchronize: true,
+    migrations: [path.join(__dirname, '/migrations/*')],
     entities: [Post, User],
   });
+  connection.runMigrations();
 
   const app = express();
   const RedisStore = connectRedis(session);
