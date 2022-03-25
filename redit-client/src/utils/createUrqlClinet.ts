@@ -1,11 +1,12 @@
 import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
-import { dedupExchange, fetchExchange, stringifyVariables } from 'urql';
+import { dedupExchange, fetchExchange, gql, stringifyVariables } from 'urql';
 import {
   LoginMutation,
   LogoutMutation,
   MeDocument,
   MeQuery,
   RegisterMutation,
+  VoteMutationVariables,
 } from '../generated/graphql';
 import { betterUpdateQuery } from './betterUpdateQuery';
 
@@ -62,6 +63,45 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
+          vote: (_result, args, cache, info) => {
+            const { postId, value } = args as VoteMutationVariables;
+            const data = cache.readFragment(
+              gql`
+                fragment _ on Post {
+                  id
+                  points
+                  voteStatus
+                }
+              `,
+              { id: postId } as any
+            );
+
+            if (data) {
+              if (data.voteStatus === value) {
+                return;
+              }
+              const newPoints =
+                (data.points as number) + (!data.voteStatus ? 1 : 2) * value;
+              cache.writeFragment(
+                gql`
+                  fragment __ on Post {
+                    points
+                    voteStatus
+                  }
+                `,
+                { id: postId, points: newPoints, voteStatus: value } as any
+              );
+            }
+          },
+          createPost: (_result, args, cache, info) => {
+            const allFields = cache.inspectFields('Query');
+            const fieldInfos = allFields.filter(
+              (info) => info.fieldName === 'posts'
+            );
+            fieldInfos.forEach((info) => {
+              cache.invalidate('Query', 'posts', info.arguments || {});
+            });
+          },
           logout: (_result: LoginMutation, args, cache, info) => {
             betterUpdateQuery<LogoutMutation, MeQuery>(
               cache,

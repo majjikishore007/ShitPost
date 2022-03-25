@@ -18,7 +18,7 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     body = (
       <>
         <NextLink href={"/login"}>
-          <Link color='black' mr={2}>
+          <Link textDecoration={"none"} color='black' mr={2}>
             Login
           </Link>
         </NextLink>
@@ -31,10 +31,15 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     );
   } else {
     body = (
-      <Flex>
+      <Flex align={'center'}>
+        <NextLink href='/createPost'>
+          <Button as={Link} mr={4}>
+            create post
+          </Button>
+        </NextLink>
         <Box mr={2}>{data.me.username}</Box>
         <Button
-          variant={"link"}
+          variant={'link'}
           isLoading={logoutFetching}
           onClick={() => {
             logout();
