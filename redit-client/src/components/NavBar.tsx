@@ -1,28 +1,29 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/react";
-import React from "react";
-import NextLink from "next/link";
-import { useLogoutMutation, useMeQuery } from "../generated/graphql";
-import { isServer } from "../utils/isServer";
+import { Box, Button, Flex, Link } from '@chakra-ui/react';
+import NextLink from 'next/link';
+import { useRouter } from 'next/router';
+import React from 'react';
+import { useLogoutMutation, useMeQuery } from '../generated/graphql';
+import { isServer } from '../utils/isServer';
 interface NavBarProps {}
 
 export const NavBar: React.FC<NavBarProps> = ({}) => {
   const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
+  const router=useRouter();
   const [{ data, fetching }] = useMeQuery({
     pause: isServer(),
   });
-  console.log("data ", data);
 
   let body = null;
   if (fetching) {
   } else if (!data?.me) {
     body = (
       <>
-        <NextLink href={"/login"}>
-          <Link textDecoration={"none"} color='black' mr={2}>
+        <NextLink href={'/login'}>
+          <Link textDecoration={'none'} color='black' mr={2}>
             Login
           </Link>
         </NextLink>
-        <NextLink href={"/register"}>
+        <NextLink href={'/register'}>
           <Link color='black' mr={2}>
             Signup
           </Link>
@@ -33,16 +34,26 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
     body = (
       <Flex align={'center'}>
         <NextLink href='/createPost'>
-          <Button as={Link} mr={4}>
+          <Button
+            style={{ textDecoration: 'none', border: 'none' }}
+            size='md'
+            bg={'dark'}
+            as={Link}
+            mr={4}
+          >
             create post
           </Button>
         </NextLink>
-        <Box mr={2}>{data.me.username}</Box>
+        <NextLink href='/profile/[id]' as={`/profile/${data.me.id}`}>
+          <Link mr={2}>{data.me.username}</Link>
+        </NextLink>
         <Button
+          style={{ textDecoration: 'none', border: 'none' }}
           variant={'link'}
           isLoading={logoutFetching}
           onClick={() => {
             logout();
+            router.push('/');
           }}
         >
           logout
@@ -52,10 +63,22 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
   }
 
   return (
-    <Flex position={'sticky'} top={'0'} zIndex={1} bg={'skyblue'}>
-      <Box ml={'auto'} p={6}>
-        {body}
-      </Box>
+    <Flex position={'sticky'} top={'0'} zIndex={1} bg={'skyblue'} px={4}>
+      <Flex maxW={900} flex={1} align='center' m={'auto'}>
+        <NextLink href={'/'}>
+          <Link
+            style={{
+              textDecoration: 'none',
+              fontSize: '13px',
+            }}
+          >
+            ShitPost
+          </Link>
+        </NextLink>
+        <Box ml={'auto'} p={6}>
+          {body}
+        </Box>
+      </Flex>
     </Flex>
   );
 };

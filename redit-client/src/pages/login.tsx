@@ -23,7 +23,6 @@ const Login: React.FC<{}> = ({}) => {
             setErrors(toErrorMap(response.data.login.errors));
           } else if (response.data?.login.user) {
             if (typeof router.query.next === 'string') {
-              console.log(router);
               router.push(router.query.next);
             } else router.push('/');
           }

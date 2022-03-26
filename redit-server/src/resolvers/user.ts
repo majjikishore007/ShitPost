@@ -46,6 +46,13 @@ export class UserResolver {
   }
 
   @Query(() => User, { nullable: true })
+  user(@Ctx() { req }: MyContext): Promise<User | undefined> {
+    // ts types [Post | null]
+    const id = req.session.userId;
+    return User.findOne(id, { relations: ['posts'] });
+  }
+
+  @Query(() => User, { nullable: true })
   me(@Ctx() { req }: MyContext) {
     // you are not logged in
     if (!req.session.userId) {

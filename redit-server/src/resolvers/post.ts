@@ -1,4 +1,3 @@
-import { Vote } from '../entities/Vote';
 import { MyContext } from 'src/types';
 import {
   Arg,
@@ -16,6 +15,7 @@ import {
 } from 'type-graphql';
 import { getConnection } from 'typeorm';
 import { Post } from '../entities/Post';
+import { Vote } from '../entities/Vote';
 import { isAuth } from '../middleware/isAuth';
 
 @InputType()
@@ -38,11 +38,7 @@ class PaginatedPosts {
 export class PostResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() root: Post) {
-    if (root.text.length > 50) {
-      return root.text.slice(0, 50);
-      
-    }
-    return root.text;
+    return root.text.slice(0, 50); 
   }
 
   @Mutation(() => Boolean)
@@ -105,14 +101,12 @@ export class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg('limit', () => Int) limit: number,
-    @Arg('cursor', () => String, { nullable: true }) cursor: string | null,
-    @Ctx() { req }: MyContext
+    @Arg('cursor', () => String, { nullable: true }) cursor: string | null
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const reaLimitPlusOne = realLimit + 1;
-    const { userId } = req.session;
     const replacements: any[] = [reaLimitPlusOne];
-        if (cursor) {
+    if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
     }
 
@@ -154,10 +148,10 @@ export class PostResolver {
   }
 
   @Query(() => Post, { nullable: true }) // defining the typegraphql type
-  post(@Arg('id') id: number): Promise<Post | undefined> {
+  post(@Arg('id', () => Int) id: number): Promise<Post | undefined> {
     // ts types [Post | null]
 
-    return Post.findOne({ id });
+    return Post.findOne(id, { relations: ['creator'] });
   }
 
   @Mutation(() => Post) // return type of the mutation
@@ -188,8 +182,20 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean) // return type of the mutation
-  async deletePost(@Arg('id') id: number): Promise<Boolean> {
+  @UseMiddleware(isAuth)
+  async deletePost(
+    @Arg('id', () => Int) id: number,
+    @Ctx() { req }: MyContext
+  ): Promise<Boolean> {
     try {
+      const post = await Post.findOne(id);
+      if (!post) {
+        return false;
+      }
+      if (post.creatorId !== req.session.userId) {
+        throw new Error('Not authenticated');
+      }
+      await Vote.delete({ postId: id });
       await Post.delete({ id });
     } catch {
       return false;

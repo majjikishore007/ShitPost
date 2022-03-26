@@ -1,6 +1,7 @@
 import { AtSignIcon } from '@chakra-ui/icons';
-import { Box, Button, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Link, Stack, Text } from '@chakra-ui/react';
 import { withUrqlClient } from 'next-urql';
+import NextLink from 'next/link';
 import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { UpVote } from '../components/UpVote';
@@ -19,15 +20,27 @@ const Index = () => {
   }
   return (
     <>
-      <Layout variant={'small'}>
+      <Layout>
         {!data && fetching ? (
           <div>loading...</div>
         ) : (
-          <Stack spacing={8} margin={'auto'} width='70%'>
+          <Stack p={4} spacing={8} margin={'auto'}>
             {data?.posts.posts.map((post) => (
-              <Box p={5} key={post.id} shadow='md' borderWidth='1px'>
-                <Flex>
-                  <Heading fontSize='xl'>{post.title}</Heading>
+              <Box
+                p={5}
+                key={post.id}
+                shadow='md'
+                borderWidth='1px'
+                borderRadius='10px'
+              >
+                <Flex align='center'>
+                  <NextLink href='/post/[id]' as={`/post/${post.id}`}>
+                    <Link>
+                      <Text fontFamily={'heading'} fontSize={'1.5em'}>
+                        {post.title}
+                      </Text>
+                    </Link>
+                  </NextLink>
                   <Text
                     px={2}
                     cursor='pointer'

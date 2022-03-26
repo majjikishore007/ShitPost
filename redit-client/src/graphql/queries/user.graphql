@@ -1,0 +1,15 @@
+query User {
+  user {
+    id
+    username
+    email
+    posts {
+      id
+      points
+      title
+      textSnippet
+      createdAt
+      updatedAt
+    }
+  }
+}
