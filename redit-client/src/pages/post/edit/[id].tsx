@@ -1,26 +1,36 @@
 import { Box, Button } from '@chakra-ui/react';
-import { Formik, Form } from 'formik';
-import { useRouter } from 'next/router';
+import { Form, Formik } from 'formik';
+import { withUrqlClient } from 'next-urql';
+import { InputTextArea } from '../../../components/InputTextArea';
+import { InputFeild } from '../../../components/InputFiled';
 import { Layout } from '../../../components/layout';
-import { usePostQuery } from '../../../generated/graphql';
+import {
+  usePostQuery,
+  useUpdatePostMutation,
+} from '../../../generated/graphql';
+import { createUrqlClient } from '../../../utils/createUrqlClinet';
 import { useGetIntId } from '../../../utils/useGetIntId';
-
+import { useRouter } from 'next/router';
 const EditPost = ({}) => {
   const router = useRouter();
   const intId = useGetIntId();
-  const { data, loading } = usePostQuery({
-    skip: intId === -1,
+  const [{ data, fetching, error }] = usePostQuery({
+    pause: intId == -1,
     variables: {
       id: intId,
     },
   });
-  const [updatePost] = useUpdatePostMutation();
-  if (loading) {
+  const [, updatePost] = useUpdatePostMutation();
+  if (fetching) {
     return (
       <Layout>
         <div>loading...</div>
       </Layout>
     );
+  }
+
+  if (error) {
+    return <div>{error.message}</div>;
   }
 
   if (!data?.post) {
@@ -30,34 +40,32 @@ const EditPost = ({}) => {
       </Layout>
     );
   }
-
   return (
     <Layout variant='small'>
       <Formik
         initialValues={{ title: data.post.title, text: data.post.text }}
         onSubmit={async (values) => {
-          await updatePost({ variables: { id: intId, ...values } });
-          router.back();
+          await updatePost({ id: intId, ...values });
+          router.push('/');
         }}
       >
         {({ isSubmitting }) => (
           <Form>
-            <InputField name='title' placeholder='title' label='Title' />
+            <InputFeild name='title' placeholder='title' label='Title' />
             <Box mt={4}>
-              <InputField
-                textarea
+              <InputTextArea
+                placeholder='text'
+                label='text'
                 name='text'
-                placeholder='text...'
-                label='Body'
-              />
+              ></InputTextArea>
             </Box>
             <Button
               mt={4}
               type='submit'
               isLoading={isSubmitting}
-              variantColor='teal'
+              colorScheme='teal'
             >
-              update post
+              Update post
             </Button>
           </Form>
         )}
@@ -66,4 +74,4 @@ const EditPost = ({}) => {
   );
 };
 
-export default withApollo({ ssr: false })(EditPost);
+export default withUrqlClient(createUrqlClient)(EditPost);

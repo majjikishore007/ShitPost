@@ -25,36 +25,38 @@ const Index = () => {
           <div>loading...</div>
         ) : (
           <Stack p={4} spacing={8} margin={'auto'}>
-            {data?.posts.posts.map((post) => (
-              <Box
-                p={5}
-                key={post.id}
-                shadow='md'
-                borderWidth='1px'
-                borderRadius='10px'
-              >
-                <Flex align='center'>
-                  <NextLink href='/post/[id]' as={`/post/${post.id}`}>
-                    <Link>
-                      <Text fontFamily={'heading'} fontSize={'1.5em'}>
-                        {post.title}
-                      </Text>
-                    </Link>
-                  </NextLink>
-                  <Text
-                    px={2}
-                    cursor='pointer'
-                    fontSize='12px'
-                    textDecoration={'underline'}
-                  >
-                    <AtSignIcon></AtSignIcon>
-                    {post.creator.username}
-                  </Text>
-                </Flex>
-                <Text mt={4}>{post.textSnippet}</Text>
-                <UpVote post={post} />
-              </Box>
-            ))}
+            {data?.posts.posts.map((post) =>
+              !post ? null : (
+                <Box
+                  p={5}
+                  key={post.id}
+                  shadow='md'
+                  borderWidth='1px'
+                  borderRadius='10px'
+                >
+                  <Flex align='center'>
+                    <NextLink href='/post/[id]' as={`/post/${post.id}`}>
+                      <Link>
+                        <Text fontFamily={'heading'} fontSize={'1.5em'}>
+                          {post.title}
+                        </Text>
+                      </Link>
+                    </NextLink>
+                    <Text
+                      px={2}
+                      cursor='pointer'
+                      fontSize='12px'
+                      textDecoration={'underline'}
+                    >
+                      <AtSignIcon></AtSignIcon>
+                      {post.creator.username}
+                    </Text>
+                  </Flex>
+                  <Text mt={4}>{post.textSnippet}</Text>
+                  <UpVote post={post} />
+                </Box>
+              )
+            )}
           </Stack>
         )}
         {data && data?.posts.hasMore ? (

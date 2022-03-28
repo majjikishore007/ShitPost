@@ -207,7 +207,9 @@ export class PostResolver {
       if (!post) {
         return false;
       }
+      
       if (post.creatorId !== req.session.userId) {
+        console.log('ehllo');
         throw new Error('Not authenticated');
       }
       await Vote.delete({ postId: id });

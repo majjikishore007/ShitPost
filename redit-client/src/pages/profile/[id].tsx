@@ -1,7 +1,6 @@
-import { AtSignIcon, DeleteIcon } from '@chakra-ui/icons';
+import { AtSignIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import {
   Box,
-  Button,
   Container,
   Flex,
   Heading,
@@ -13,6 +12,7 @@ import {
 import { withUrqlClient } from 'next-urql';
 import NextLink from 'next/link';
 import React from 'react';
+import { EditAndDelete } from '../../components/EditAndDelete';
 import { Layout } from '../../components/layout';
 import { UserQuery, useUserQuery } from '../../generated/graphql';
 import { createUrqlClient } from '../../utils/createUrqlClinet';
@@ -69,12 +69,14 @@ const Profile: React.FC<UserProps> = ({ _user }) => {
                     {data.user?.username}
                   </Text>
                 </Flex>
-                <Text mt={4}>{post.textSnippet}</Text>
-                <IconButton
-                  icon={<DeleteIcon />}
-                  aria-label='Delete Post'
-                  onClick={() => {}}
-                />
+                <Flex>
+                  <Text px={2} mt={4}>
+                    {post.textSnippet}
+                  </Text>
+                  <Box ml={'auto'}>
+                    <EditAndDelete id={post.id}></EditAndDelete>
+                  </Box>
+                </Flex>
               </Box>
             ))}
           </Stack>
