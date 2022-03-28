@@ -51,9 +51,9 @@ export const NavBar: React.FC<NavBarProps> = ({}) => {
           style={{ textDecoration: 'none', border: 'none' }}
           variant={'link'}
           isLoading={logoutFetching}
-          onClick={() => {
-            logout();
-            router.push('/');
+          onClick={async () => {
+            await logout();
+            router.reload();
           }}
         >
           logout

@@ -12,7 +12,6 @@ export const UpVote: React.FC<UpVoteProps> = ({ post }) => {
     'updoot-loading' | 'downdoot-loading' | 'not-loading'
   >('not-loading');
   const [, vote] = useVoteMutation();
-  
 
   return (
     <Flex

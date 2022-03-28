@@ -43,8 +43,20 @@ export class PostResolver {
   }
 
   @FieldResolver(() => User)
-  creator(@Root() post: Post) {
-    return User.findOne(post.creatorId);
+  creator(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(post.creatorId);
+  }
+
+  @FieldResolver(() => Int, { nullable: true })
+  async voteStatus(@Root() post: Post, @Ctx() { req, voteLoader }: MyContext) {
+    if (!req.session.userId) {
+      return null;
+    }
+    const vote = await voteLoader.load({
+      postId: post.id,
+      userId: req.session.userId,
+    });
+    return vote ? vote.value : null;
   }
 
   @Mutation(() => Boolean)
@@ -109,23 +121,29 @@ export class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg('limit', () => Int) limit: number,
-    @Arg('cursor', () => String, { nullable: true }) cursor: string | null,
-    @Ctx() { req }: MyContext
+    @Arg('cursor', () => String, { nullable: true }) cursor: string | null
   ): Promise<PaginatedPosts> {
     const realLimit = Math.min(50, limit);
     const reaLimitPlusOne = realLimit + 1;
     const replacements: any[] = [reaLimitPlusOne];
-    if (req.session.userId) {
-      console.log('cursor not there ::::::');
-      replacements.push(req.session.userId);
-    }
-    let cursorIndex = 3;
+
     if (cursor) {
       replacements.push(new Date(parseInt(cursor)));
-      cursorIndex = replacements.length;
     }
 
     const posts = await getConnection().query(
+      `
+      select
+      p.*
+      from post p
+      ${cursor ? ` where p."createdAt" < $2` : ''}
+      order by p."createdAt" DESC
+      limit $1
+      `,
+      replacements
+    );
+    /**
+       *  const posts = await getConnection().query(
       `
       select
       p.*,
@@ -133,14 +151,15 @@ export class PostResolver {
         req.session.userId
           ? '(select value from vote where "userId" =$2 and "postId"=p.id ) "voteStatus" '
           : ' null as "voteStatus"'
-      }
+      //}
       from post p
       ${cursor ? ` where p."createdAt" < $${cursorIndex}` : ''}
       order by p."createdAt" DESC
       limit $1
       `,
       replacements
-    );
+   // );
+      */
     /*
     const qb = getConnection()
       .getRepository(Post)
@@ -181,7 +200,7 @@ export class PostResolver {
   @Mutation(() => Post, { nullable: true }) // return type of the mutation
   @UseMiddleware(isAuth)
   async updatePost(
-    @Arg('id',()=>Int) id: number,
+    @Arg('id', () => Int) id: number,
     @Arg('title') title: string,
     @Arg('text') text: string,
     @Ctx() { req }: MyContext
@@ -190,7 +209,10 @@ export class PostResolver {
       .createQueryBuilder()
       .update(Post)
       .set({ title, text })
-      .where('id = :id   and "creatorId" = :creatorId ' , { id, creatorId: req.session.userId })
+      .where('id = :id   and "creatorId" = :creatorId ', {
+        id,
+        creatorId: req.session.userId,
+      })
       .returning('*')
       .execute();
     return updated.raw[0];
@@ -207,7 +229,7 @@ export class PostResolver {
       if (!post) {
         return false;
       }
-      
+
       if (post.creatorId !== req.session.userId) {
         console.log('ehllo');
         throw new Error('Not authenticated');
