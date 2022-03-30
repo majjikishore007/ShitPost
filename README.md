@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to redit-clone 👋</h1>
+<h1 align="center">Welcome to shit post 👋</h1>
 <p>
   <a href="https://twitter.com/Majjikishore1" target="_blank">
     <img alt="Twitter: Majjikishore1" src="https://img.shields.io/twitter/follow/Majjikishore1.svg?style=social" />
