@@ -1,0 +1,26 @@
+version: "3"
+services:
+  redis:
+    image: redis
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres 
+      POSTGRES_DB: shitpost
+    volumes:
+      - ./pgdata:/var/lib/postgres/data
+    ports:
+      - '5432:5432'
+  web:
+    image: majji007/shitpost
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    command: ["./wait-for-it.sh", "db:5432", "--", "node", "index.js"]
+networks:
+  webnet:

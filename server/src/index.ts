@@ -1,6 +1,7 @@
 import { ApolloServer } from 'apollo-server-express';
 import connectRedis from 'connect-redis';
 import cors from 'cors';
+import 'dotenv-safe/config';
 import express from 'express';
 import session from 'express-session';
 import Redis from 'ioredis';
@@ -8,32 +9,25 @@ import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
 import { COOKIE_NAME, __prod__ } from './constants';
-import { Post } from './entities/Post';
-import { User } from './entities/User';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
-import path from 'path';
-import { Vote } from './entities/Vote';
 import { createUserLoader } from './utils/createUserLoader';
 import { createVoteLoader } from './utils/createVoteLoader';
 
+const PORT = parseInt(process.env.PORT);
+const REDIS_URL = process.env.REDIS_URL;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const ORIGIN_URL = process.env.ORIGIN;
+
 const main = async () => {
-  const connection = await createConnection({
-    type: 'postgres',
-    database: 'redit',
-    username: 'postgres',
-    password: 'psql',
-    logging: true,
-    synchronize: true,
-    migrations: [path.join(__dirname, '/migrations/*')],
-    entities: [Post, User, Vote],
-  });
+  const connection = await createConnection();
+
   connection.runMigrations();
 
   const app = express();
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis(REDIS_URL);
   redis.set('congo', 'connectRedis');
   console.log(
     'yay! your redis successfully connected',
@@ -42,7 +36,7 @@ const main = async () => {
 
   app.use(
     cors({
-      origin: 'http://localhost:3000',
+      origin: ORIGIN_URL,
       credentials: true,
     })
   );
@@ -60,7 +54,7 @@ const main = async () => {
         secure: __prod__, // for security
       },
       saveUninitialized: false,
-      secret: 'hsdkhfjkahfdhasjhfjashdfjhalhhdhdq',
+      secret: SESSION_SECRET,
       resave: false,
     })
   );
@@ -84,7 +78,7 @@ const main = async () => {
     cors: false,
   });
 
-  app.listen(4000, () => {
+  app.listen(PORT, () => {
     console.log('server is listening on port 4000');
   });
 };
