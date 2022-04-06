@@ -33,7 +33,6 @@ const main = async () => {
     'yay! your redis successfully connected',
     await redis.get('congo')
   );
-
   app.use(
     cors({
       origin: ORIGIN_URL,

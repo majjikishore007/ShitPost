@@ -1,26 +1,28 @@
 version: "3"
 services:
+  db:
+    image: 'postgres'
+    environment:
+      POSTGRES_PASSWORD: '123456'
+      POSTGRES_USER: 'docker'
+    volumes:
+      - data:/var/lib/postgresql/data 
+    ports:
+      - '4321:5432'
   redis:
     image: redis
-  db:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres 
-      POSTGRES_DB: shitpost
-    volumes:
-      - ./pgdata:/var/lib/postgres/data
+    container_name: cache
+    expose:
+      - 6379
+  server:
+    build: .
     ports:
-      - '5432:5432'
-  web:
-    image: majji007/shitpost
-    ports:
-      - "8081:8081"
+      - "4000:4000"
     depends_on:
+      - redis
       - db
     environment:
       DB_HOST: db
-      REDIS_HOST: redis
-    command: ["./wait-for-it.sh", "db:5432", "--", "node", "index.js"]
-networks:
-  webnet:
+      REDIS_URL: redis://cache
+volumes:
+  data:
