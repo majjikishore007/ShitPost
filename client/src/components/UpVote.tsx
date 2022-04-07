@@ -11,7 +11,7 @@ export const UpVote: React.FC<UpVoteProps> = ({ post }) => {
   const [loadingState, setLoadingState] = useState<
     'updoot-loading' | 'downdoot-loading' | 'not-loading'
   >('not-loading');
-  const [, vote] = useVoteMutation();
+  const [vote] = useVoteMutation();
 
   return (
     <Flex
@@ -30,8 +30,10 @@ export const UpVote: React.FC<UpVoteProps> = ({ post }) => {
           }
           setLoadingState('updoot-loading');
           await vote({
-            postId: post.id,
-            value: 1,
+            variables: {
+              postId: post.id,
+              value: 1,
+            },
           });
           setLoadingState('not-loading');
         }}
@@ -48,8 +50,10 @@ export const UpVote: React.FC<UpVoteProps> = ({ post }) => {
           }
           setLoadingState('downdoot-loading');
           await vote({
-            postId: post.id,
-            value: -1,
+            variables: {
+              postId: post.id,
+              value: -1,
+            },
           });
           setLoadingState('not-loading');
         }}
