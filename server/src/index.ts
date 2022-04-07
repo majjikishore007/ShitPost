@@ -9,6 +9,7 @@ import 'reflect-metadata';
 import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
 import { COOKIE_NAME, __prod__ } from './constants';
+import ormconfig from './dbconfig/ormconfig';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
 import { UserResolver } from './resolvers/user';
@@ -21,7 +22,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const ORIGIN_URL = process.env.ORIGIN;
 
 const main = async () => {
-  const connection = await createConnection();
+  const connection = await createConnection(ormconfig);
 
   connection.runMigrations();
 
@@ -78,7 +79,7 @@ const main = async () => {
   });
 
   app.listen(PORT, () => {
-    console.log('server is listening on port 4000');
+    console.log(`server is listening on port ${PORT}`);
   });
 };
 

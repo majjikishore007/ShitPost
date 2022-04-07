@@ -10,7 +10,10 @@
     "start2": "ts-node src/index.ts",
     "dev": "nodemon dist/index.js",
     "dev2": "nodemon --exec ts-node src/index.ts",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "typeorm": "ts-node ./node_modules/.bin/typeorm -f ./src/dbconfig/ormconfig.ts",
+    "migration:generate": "yarn run typeorm migration:generate -n",
+    "migration:blank": "yarn run typeorm migration:create -n"
   },
   "author": "majjikishore",
   "license": "ISC",

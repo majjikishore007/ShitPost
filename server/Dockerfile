@@ -9,7 +9,8 @@ COPY yarn.lock ./
 RUN yarn
 
 COPY . .
+COPY .env.prod .env
 
 RUN yarn build
 
-CMD [ "yarn", "dev" ]
+CMD [ "yarn", "start" ]
