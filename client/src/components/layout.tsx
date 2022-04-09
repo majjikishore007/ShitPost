@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavBar } from './NavBar';
+import { NavigationBar } from './NavigationBar';
 import { Wrapper, WrapperVariants } from './Wrapper';
 
 interface layoutProps {
@@ -9,7 +10,8 @@ interface layoutProps {
 export const Layout: React.FC<layoutProps> = ({ children, variant }) => {
   return (
     <>
-      <NavBar></NavBar>
+      <NavigationBar></NavigationBar>
+      {/* <NavBar></NavBar> */}
       <Wrapper variant={variant}>{children}</Wrapper>
     </>
   );
