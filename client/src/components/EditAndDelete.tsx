@@ -1,14 +1,14 @@
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { EditIcon, DeleteIcon } from '@chakra-ui/icons';
 import { IconButton, Link } from '@chakra-ui/react';
-import NextLink from 'next/link';
 import React from 'react';
+import NextLink from 'next/link';
 import { useDeletePostMutation } from '../generated/graphql';
 interface EditAndDeleteProps {
   id: number;
 }
 
 export const EditAndDelete: React.FC<EditAndDeleteProps> = ({ id }) => {
-  const [deletePost] = useDeletePostMutation();
+  const [, deletePost] = useDeletePostMutation();
   return (
     <>
       <NextLink href='/post/edit/[id]' as={`/post/edit/${id}`}>
@@ -23,7 +23,7 @@ export const EditAndDelete: React.FC<EditAndDeleteProps> = ({ id }) => {
         icon={<DeleteIcon />}
         aria-label='Delete Post'
         onClick={() => {
-          deletePost({ variables: { id } });
+          deletePost({ id });
         }}
       />
     </>

@@ -1,25 +1,27 @@
 import { AtSignIcon } from '@chakra-ui/icons';
 import { Box, Button, Flex, Link, Stack, Text } from '@chakra-ui/react';
+import { withUrqlClient } from 'next-urql';
 import NextLink from 'next/link';
+import { useState } from 'react';
 import { Layout } from '../components/layout';
 import { UpVote } from '../components/UpVote';
 import { usePostsQuery } from '../generated/graphql';
-import { withApollo } from '../utils/withApollo';
+import { createUrqlClient } from '../utils/createUrqlClinet';
 const Index = () => {
-  const { data, error, loading, fetchMore, variables } = usePostsQuery({
-    variables: {
-      limit: 15,
-      cursor: null,
-    },
-    notifyOnNetworkStatusChange: true,
+  const [variables, setVariables] = useState({
+    limit: 15,
+    cursor: null as null | string,
   });
-  if (!loading && !data) {
+  const [{ data, fetching }] = usePostsQuery({
+    variables,
+  });
+  if (!fetching && !data) {
     return <div>Something went wrong.... !</div>;
   }
   return (
     <>
       <Layout>
-        {!data && loading ? (
+        {!data && fetching ? (
           <div>loading...</div>
         ) : (
           <Stack p={4} spacing={8} margin={'auto'}>
@@ -61,15 +63,13 @@ const Index = () => {
           <Flex>
             <Button
               onClick={() => {
-                fetchMore({
-                  variables: {
-                    limit: variables?.limit,
-                    cursor:
-                      data.posts.posts[data.posts.posts.length - 1].createdAt,
-                  },
+                setVariables({
+                  limit: variables.limit,
+                  cursor:
+                    data.posts.posts[data.posts.posts.length - 1].createdAt,
                 });
               }}
-              isLoading={loading}
+              isLoading={fetching}
               m='auto'
               my={8}
             >
@@ -81,4 +81,4 @@ const Index = () => {
     </>
   );
 };
-export default withApollo({ ssr: true })(Index);
+export default withUrqlClient(createUrqlClient, { ssr: true })(Index);

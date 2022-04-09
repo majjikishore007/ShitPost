@@ -1,24 +1,25 @@
 import { Box, Button } from "@chakra-ui/react";
-import { Form, Formik } from 'formik';
-import { useRouter } from 'next/router';
-import React from 'react';
+import { Form, Formik } from "formik";
+import { withUrqlClient } from "next-urql";
+import { useRouter } from "next/router";
+import React from "react";
 import { InputFeild } from '../components/InputFiled';
 import { Wrapper } from '../components/Wrapper';
 import { useRegisterMutation } from '../generated/graphql';
+import { createUrqlClient } from '../utils/createUrqlClinet';
 import { toErrorMap } from '../utils/toErrorMap';
-import { withApollo } from '../utils/withApollo';
 
 interface registerProps {}
 
 const Register: React.FC<registerProps> = ({}) => {
   const router = useRouter();
-  const [register] = useRegisterMutation();
+  const [, register] = useRegisterMutation();
   return (
     <Wrapper variant={'small'}>
       <Formik
         initialValues={{ email: '', username: '', password: '' }}
         onSubmit={async (values, { setErrors }) => {
-          const response = await register({ variables: { options: values } });
+          const response = await register({ options: values });
 
           if (response.data?.register.errors) {
             setErrors(toErrorMap(response.data.register.errors));
@@ -57,4 +58,4 @@ const Register: React.FC<registerProps> = ({}) => {
   );
 };
 
-export default withApollo({ ssr: false })(Register);
+export default withUrqlClient(createUrqlClient)(Register);

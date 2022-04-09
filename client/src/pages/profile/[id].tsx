@@ -1,24 +1,27 @@
-import { AtSignIcon } from '@chakra-ui/icons';
+import { AtSignIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import {
   Box,
   Container,
   Flex,
   Heading,
+  IconButton,
   Link,
   Stack,
   Text,
 } from '@chakra-ui/react';
+import { withUrqlClient } from 'next-urql';
 import NextLink from 'next/link';
 import React from 'react';
 import { EditAndDelete } from '../../components/EditAndDelete';
 import { Layout } from '../../components/layout';
 import { UserQuery, useUserQuery } from '../../generated/graphql';
+import { createUrqlClient } from '../../utils/createUrqlClinet';
 interface UserProps {
   _user: UserQuery;
 }
 
 const Profile: React.FC<UserProps> = ({ _user }) => {
-  const { data, loading } = useUserQuery();
+  const [{ data, fetching }] = useUserQuery();
   if (!data) {
     return <>Somthing went wrong !</>;
   }
@@ -83,4 +86,4 @@ const Profile: React.FC<UserProps> = ({ _user }) => {
   );
 };
 
-export default Profile;
+export default withUrqlClient(createUrqlClient)(Profile);

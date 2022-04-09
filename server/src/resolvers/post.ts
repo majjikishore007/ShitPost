@@ -66,17 +66,15 @@ export class PostResolver {
     @Arg('value', () => Int) value: number,
     @Ctx() { req }: MyContext
   ) {
-    const isUpVote = value !== -1;
-    const realValue = isUpVote ? 1 : -1;
+    const isUpdoot = value !== -1;
+    const realValue = isUpdoot ? 1 : -1;
     const { userId } = req.session;
 
-    const vote = await Vote.findOne({ where: { postId, userId } });
+    const updoot = await Vote.findOne({ where: { postId, userId } });
     // if the user voted and want to change the vote
+    console.log('getting for updatae ;;;;', updoot);
 
-    console.log('getting for updatae ;;;;-----------------', vote?.value);
-    console.log('real value : ' + realValue);
-
-    if (vote && vote.value !== realValue) {
+    if (updoot && updoot.value !== realValue) {
       await getConnection().transaction(async (tm) => {
         await tm.query(
           `
@@ -96,7 +94,7 @@ export class PostResolver {
           [2 * realValue, postId]
         );
       });
-    } else if (!vote) {
+    } else if (!updoot) {
       await getConnection().transaction(async (t) => {
         await t.query(
           `
