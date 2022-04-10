@@ -31,7 +31,7 @@ const Register: React.FC<registerProps> = ({}) => {
     >
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={8} px={6}>
         <Stack align={'center'}>
-          <Heading fontSize={'2xl'}>Sign in to your account</Heading>
+          <Heading fontSize={'3xl'}>Create your account</Heading>
           <Text fontSize={'lg'} color={'gray.600'}>
             to enjoy all of our cool <Link color={'blue.400'}>features</Link> ✌️
           </Text>
@@ -51,26 +51,36 @@ const Register: React.FC<registerProps> = ({}) => {
           {({ isSubmitting }) => (
             <Form>
               <InputFeild
-                label='UserName'
+                label=''
+                placeholder='Username'
                 name='username'
                 type='text'
               ></InputFeild>
-              <InputFeild label='Email' name='email' type='email'></InputFeild>
+              <InputFeild
+                label=''
+                name='email'
+                type='email'
+                placeholder='Email'
+              ></InputFeild>
               <Box mt={4}>
                 <InputFeild
-                  label='Password'
+                  placeholder='Password'
+                  label=''
                   name='password'
                   type='password'
                 ></InputFeild>
               </Box>
-              <Button
-                isLoading={isSubmitting}
-                mt={4}
-                colorScheme='teal'
-                type={'submit'}
-              >
-                Submit
-              </Button>
+
+              <Stack spacing={10} pt={2}>
+                <Button
+                  isLoading={isSubmitting}
+                  mt={4}
+                  colorScheme='teal'
+                  type={'submit'}
+                >
+                  Submit
+                </Button>
+              </Stack>
             </Form>
           )}
         </Formik>

@@ -43,7 +43,7 @@ export const UpVote: React.FC<UpVoteProps> = ({ post }) => {
       <IconButton
         size={'xs'}
         onClick={async () => {
-          if (post.voteStatus == 1) {
+          if (post.voteStatus == -1) {
             return;
           }
           setLoadingState('downdoot-loading');

@@ -33,8 +33,8 @@ const CreatePost: React.FC<{}> = ({}) => {
             <InputFeild name='title' placeholder='title' label='Title' />
             <Box mt={4}>
               <InputTextArea
-                placeholder='text'
-                label='text'
+                placeholder="what's going on"
+                label='Description'
                 name='text'
               ></InputTextArea>
             </Box>

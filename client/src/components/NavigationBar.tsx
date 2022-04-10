@@ -4,19 +4,19 @@ import {
   Flex,
   HStack,
   Link,
-  Menu,
-  MenuButton,
-  MenuItem,
+  Menu, MenuItem,
   MenuList,
   Stack,
   useColorMode,
   useColorModeValue,
-  useDisclosure,
-  useMediaQuery,
+  useDisclosure
 } from '@chakra-ui/react';
 import NextLink from 'next/link';
+import router from 'next/router';
 import React, { ReactNode } from 'react';
 import { BsMoonStarsFill, BsSun } from 'react-icons/bs';
+import { useLogoutMutation, useMeQuery } from '../generated/graphql';
+import { isServer } from '../utils/isServer';
 
 const Links = ['create post'];
 const NavLink = ({ children }: { children: ReactNode }) => (
@@ -33,10 +33,65 @@ const NavLink = ({ children }: { children: ReactNode }) => (
     {children}
   </Link>
 );
+
+
 export const NavigationBar: React.FC<{}> = ({}) => {
+
+  const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
-  const [isLargerThan1280] = useMediaQuery('(min-width: 1280px)');
+  const [{ data, fetching }] = useMeQuery({
+    pause: isServer(),
+  });
+
+  let body = null;
+  if (fetching) {
+  } else if (!data?.me) {
+    body = (
+      <>
+        <NextLink href={'/login'}>
+          <Link textDecoration={'none'} color='black' mr={2}>
+            Login
+          </Link>
+        </NextLink>
+        <NextLink href={'/register'}>
+          <Link color='black' mr={2}>
+            Signup
+          </Link>
+        </NextLink>
+      </>
+    );
+  } else {
+    body = (
+      <Flex align={'center'}>
+        <NextLink href='/createPost'>
+          <Button
+            style={{ textDecoration: 'none', border: 'none' }}
+            size='md'
+            bg={'dark'}
+            as={Link}
+            mr={4}
+          >
+            create post
+          </Button>
+        </NextLink>
+        <NextLink href='/profile/[id]' as={`/profile/${data.me.id}`}>
+          <Link mr={2}>{data.me.username}</Link>
+        </NextLink>
+        <Button
+          style={{ textDecoration: 'none', border: 'none' }}
+          variant={'link'}
+          isLoading={logoutFetching}
+          onClick={async () => {
+            await logout();
+            router.reload();
+          }}
+        >
+          logout
+        </Button>
+      </Flex>
+    );
+  }
   return (
     <>
       <Box
