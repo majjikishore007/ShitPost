@@ -9,6 +9,8 @@ declare global {
       PORT: string;
       SESSION_SECRET: string;
       ORIGIN: string;
+      EMAIL_ADDRESS: string;
+      EMAIL_PASSWORD: string;
     }
   }
 }
