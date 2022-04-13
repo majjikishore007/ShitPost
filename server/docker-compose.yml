@@ -1,5 +1,33 @@
 version: "3"
 services:
+  nginx:
+    image: nginx:mainline-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - web-root:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    depends_on:
+      - server
+    networks:
+      - app-network
+  server:
+    build: .
+    container_name: shitpost_server 
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DB_HOST: db
+      REDIS_URL: redis://cache
+    networks:
+      - app-network
   db:
     image: 'postgres'
     environment:
@@ -13,16 +41,17 @@ services:
     image: redis
     container_name: cache
     expose:
-      - 6379
-  server:
-    build: .
-    ports:
-      - "4000:4000"
-    depends_on:
-      - redis
-      - db
-    environment:
-      DB_HOST: db
-      REDIS_URL: redis://cache
+      - 6379 
 volumes:
   data:
+  certbot-etc:
+  certbot-var:
+  web-root:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/majjikishore007/MySpace/PersonalProj/ShitPost/server
+      o: bind
+networks:
+  app-network:
+    driver: bridge  
