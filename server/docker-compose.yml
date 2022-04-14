@@ -1,34 +1,22 @@
 version: "3"
 services:
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - certbot-etc:/etc/letsencrypt
-      - certbot-var:/var/lib/letsencrypt
-      - web-root:/var/www/html
-    depends_on:
-      - nginx
-    command: certonly --webroot --webroot-path=/var/www/html --email rockymajji007@gmail.com --agree-tos --no-eff-email --staging -d shitpost.tech  -d www.shitpost.tech 
-  nginx:
-    image: nginx:mainline-alpine
-    container_name: nginx
-    restart: unless-stopped
+  webserver:
+    image: nginx:latest
     ports:
-      - "80:80"
+      - 80:80
+      - 443:443
+    restart: always
+    networks:
+      - app-network
+    depends_on:
+      - server 
     volumes:
       - web-root:/var/www/html
       - ./nginx-conf:/etc/nginx/conf.d
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
-    depends_on:
-      - server
-    networks:
-      - app-network
-  
   server:
     build: .
-    container_name: shitpost_server 
     ports:
       - "4000:4000"
     depends_on:
@@ -48,11 +36,25 @@ services:
       - data:/var/lib/postgresql/data 
     ports:
       - '4321:5432'
+    networks:
+      - app-network
   redis:
     image: redis
     container_name: cache
     expose:
-      - 6379 
+      - 6379
+    networks:
+      - app-network
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - webserver
+    command: certonly --webroot --webroot-path=/var/www/html --email majjikishore031@gmail.com --agree-tos --no-eff-email --staging -d shitpost.tech  -d www.shitpost.tech  
 volumes:
   data:
   certbot-etc:
@@ -61,7 +63,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/lily/ShitPost/server
+      device: /home/azureuser/ShitPost/server
       o: bind
 networks:
   app-network:
