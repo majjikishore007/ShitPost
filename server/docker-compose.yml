@@ -2,6 +2,7 @@ version: "3"
 services:
   webserver:
     image: nginx:latest
+    container_name: webserver
     ports:
       - 80:80
     restart: always
@@ -16,6 +17,7 @@ services:
       - certbot-var:/var/lib/letsencrypt
   server:
     build: .
+    container_name: server
     ports:
       - "4000:4000"
     depends_on:
