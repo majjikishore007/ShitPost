@@ -1,0 +1,4 @@
+/home/azureuser/ShitPost/server
+
+
+sudo openssl dhparam -out /home/azureuser/ShitPost/server/dhparam/dhparam-2048.pem 2048
