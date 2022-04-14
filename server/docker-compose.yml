@@ -68,7 +68,12 @@ volumes:
       type: none
       device: /home/azureuser/ShitPost/server
       o: bind
-    
+  dhparam:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/azureuser/ShitPost/server/dhparam/
+      o: bind 
 networks:
   app-network:
     driver: bridge  
