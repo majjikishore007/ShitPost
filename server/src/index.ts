@@ -25,8 +25,8 @@ const main = async () => {
   const connection = await createConnection(ormconfig);
 
   connection.runMigrations();
-
   const app = express();
+  app.set('trust proxy', 1);
   const RedisStore = connectRedis(session);
   const redis = new Redis(REDIS_URL);
   redis.set('congo', 'connectRedis');
@@ -40,6 +40,7 @@ const main = async () => {
       credentials: true,
     })
   );
+
   app.use(
     session({
       name: COOKIE_NAME,
@@ -52,6 +53,7 @@ const main = async () => {
         httpOnly: true, // make the cookie unaccessible for the frontend
         sameSite: 'lax',
         secure: __prod__, // for security
+        domain: __prod__ ? 'shitpost.tech' : undefined,
       },
       saveUninitialized: false,
       secret: SESSION_SECRET,
