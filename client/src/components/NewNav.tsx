@@ -113,10 +113,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
     >
       <Flex h='20' alignItems='center' mx='8' justifyContent='space-between'>
         <Box mt={4} maxW={'50px'}>
-          <img
-            src='https://cdn-icons.flaticon.com/png/512/2045/premium/2045423.png?token=exp=1649567172~hmac=5639f54f5f74c4c81eaf5b3e30ccda9f'
-            alt=''
-          />
+          <img src='https://i.ibb.co/d0dq60x/logo.png' alt='' />
         </Box>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
