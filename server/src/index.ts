@@ -73,6 +73,8 @@ const main = async () => {
       userLoader: createUserLoader(),
       voteLoader: createVoteLoader(),
     }),
+    playground: true,
+    introspection: true,
   });
   await apolloServer.start();
   apolloServer.applyMiddleware({
