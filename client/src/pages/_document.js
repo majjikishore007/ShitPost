@@ -5,7 +5,13 @@ export default class Document extends NextDocument {
   render() {
     return (
       <Html>
-        <Head />
+        <Head>
+          <title>Shitpost.tech</title>
+          <meta
+            name='description'
+            content='a website where you make fun posts and have fun '
+          />
+        </Head>
         <body>
           {/* Make Color mode to persists when you refresh the page. */}
           <ColorModeScript />
@@ -13,6 +19,6 @@ export default class Document extends NextDocument {
           <NextScript />
         </body>
       </Html>
-    )
+    );
   }
 }
