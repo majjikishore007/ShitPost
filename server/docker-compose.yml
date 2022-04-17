@@ -1,5 +1,35 @@
 version: "3"
 services:
+  webserver:
+    image: nginx:latest
+    container_name: webserver
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    networks:
+      - app-network
+    depends_on:
+      - server 
+    volumes:
+      - web-root:/var/www/html
+      - ./nginx-conf:/etc/nginx/conf.d
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - dhparam:/etc/ssl/certs
+  server:
+    build: .
+    container_name: server
+    ports:
+      - "4000:4000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DB_HOST: db
+      REDIS_URL: redis://cache
+    networks:
+      - app-network
   db:
     image: 'postgres'
     environment:
@@ -9,20 +39,41 @@ services:
       - data:/var/lib/postgresql/data 
     ports:
       - '4321:5432'
+    networks:
+      - app-network
   redis:
     image: redis
     container_name: cache
     expose:
       - 6379
-  server:
-    build: .
-    ports:
-      - "4000:4000"
+    networks:
+      - app-network
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
     depends_on:
-      - redis
-      - db
-    environment:
-      DB_HOST: db
-      REDIS_URL: redis://cache
+      - webserver
+    command: certonly --webroot --webroot-path=/var/www/html --email majjikishore031@gmail.com --agree-tos --no-eff-email --force-renewal -d shitpost.tech  -d www.shitpost.tech  
 volumes:
   data:
+  certbot-etc:
+  certbot-var:
+  web-root:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/azureuser/ShitPost/server
+      o: bind
+  dhparam:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/azureuser/ShitPost/server/dhparam/
+      o: bind 
+networks:
+  app-network:
+    driver: bridge  
