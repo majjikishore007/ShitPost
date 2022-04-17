@@ -213,6 +213,7 @@ export class UserResolver {
     }
     // setting the user cookie in the express session
     req.session.userId = user.id;
+    console.log("user session -------",req.session)
     return {
       user,
     };
