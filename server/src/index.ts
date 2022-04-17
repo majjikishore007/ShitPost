@@ -20,7 +20,7 @@ const PORT = parseInt(process.env.PORT);
 const REDIS_URL = process.env.REDIS_URL;
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const ORIGIN_URL = process.env.ORIGIN;
-
+console.log("prod",__prod__);
 const main = async () => {
   const connection = await createConnection(ormconfig);
 
@@ -34,6 +34,7 @@ const main = async () => {
     'yay! your redis successfully connected',
     await redis.get('congo')
   );
+   app.set("trust proxy", 1);
   app.use(
     cors({
       origin: ORIGIN_URL,
@@ -52,8 +53,8 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 364 * 10, // 10 years
         httpOnly: true, // make the cookie unaccessible for the frontend
         sameSite: 'lax',
-        secure: __prod__, // for security
-        domain: __prod__ ? 'shitpost.tech' : undefined,
+       secure: __prod__, // for security
+      domain: __prod__ ? 'shitpost.tech' : undefined,
       },
       saveUninitialized: false,
       secret: SESSION_SECRET,
@@ -73,8 +74,8 @@ const main = async () => {
       userLoader: createUserLoader(),
       voteLoader: createVoteLoader(),
     }),
-    playground: true,
-    introspection: true,
+     playground: true,
+    introspection:true,
   });
   await apolloServer.start();
   apolloServer.applyMiddleware({
