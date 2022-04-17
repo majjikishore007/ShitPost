@@ -1,5 +1,5 @@
 dist
 node_modules
 .env
-dhparam
-.env.prod
+./dhparam
+./env.prod
