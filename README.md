@@ -1,113 +1,118 @@
+
 <div align="center">
-
- <img style="width: 50%; height: 50%;" src="images/webview.png" alt="">
-
-# Shit-Post.tech
-
+  <img src="images/webview.png" alt="Shit-Post.tech" width="50%" height="50%">
+  
+  # Shit-Post.tech
 </div>
 
 <div align="left">
   <h3>
-    <a href="https://web.shitPost.tech">
-      Demo
-    </a>
+    <a href="https://web.shitPost.tech" target="_blank">Live Demo</a>
   </h3>
 </div>
 
 <!-- TABLE OF CONTENTS -->
-A fullstack project containerised with Docker and a reverse proxy nginx at the backend.
-
 ## Table of Contents
 
+- [Overview](#overview)
 - [Built With](#built-with)
 - [Features](#features)
-- [setup guide](#setup-guide)
+- [Setup Guide](#setup-guide)
+- [Show Your Support](#show-your-support)
 
+## Overview
 
-<!-- OVERVIEW -->
+Shit-Post.tech is a web app that allows users to create, edit, like, and delete posts like Reddit. With a simple and intuitive interface, users can easily interact with content, engage with other users, and manage their posts. This project showcases the integration of modern web technologies on both the front end and backend.
 
+## Built With
 
+### Frontend
+- **Next.js** - React Framework for Production
+- **TypeScript** - Typed JavaScript at Any Scale
+- **URQL** - GraphQL Client
+- **Chakra UI** - Simple, Modular, and Accessible Component Library
 
-### Built With
-
-<!-- This section should list any major frameworks that you built your project using. Here are a few examples.-->
-## Frontend
-- Next js
-- TypeScript
-- URQL  GraphQL client 
-- Chakra UI
-## Backend
-- NodeJS 
-- TypeScript
-- GraphQL (Apollo)
-- Type Orm
-- Redis (Session storage)
-- PostgreSQL (Database)
-- Docker 
-- Nginx (reverse proxy)
+### Backend
+- **Node.js** - JavaScript Runtime
+- **TypeScript** - Typed JavaScript at Any Scale
+- **GraphQL (Apollo)** - Query Language for Your API
+- **TypeORM** - ORM for TypeScript and JavaScript
+- **Redis** - In-Memory Data Structure Store for Session Management
+- **PostgreSQL** - Relational Database Management System
+- **Docker** - Containerization Platform
+- **Nginx** - Reverse Proxy Server
 
 ## Features
 
-<!-- List the features of your application or follow the template. Don't share the figma file here :) -->
-
-This application has features :
-- User authentication 
-  - Signin 
+- **User Authentication**
+  - Sign In
   - Register
-  - Reset Password (forget password)
-- User can 
-  - Create post
-  - Edit post
-  - Delete post
-  - Up vote or down vote others posts
-- Pagination
-- User sessions are stored in the in memory database (Redis)
-## Setup guide
-- fork the repo on github
-- clone it to your local Setup
-- make sure you have node installed of version 14 or above
+  - Password Reset
+- **User Interactions**
+  - Create Posts
+  - Edit Posts
+  - Delete Posts
+  - Upvote/Downvote Posts
+- **Pagination** - Efficient Content Browsing
+- **Session Management** - Stored in Redis for Performance Optimization
 
-# Backend
+## Setup Guide
 
-- Make sure to update your database and redis configuration in the env file
+To get started with the project locally, follow these steps:
 
-```
-cd server 
+### Backend Setup
 
-# this will compile the ts file js and keep watching
-yarn watch 
+1. **Clone the repository:**
 
-# open a new terminal
+    ```bash
+    git clone https://github.com/your-repo/shit-post-tech.git
+    ```
 
-yarn dev
+2. **Navigate to the server directory:**
 
-```
+    ```bash
+    cd server
+    ```
 
+3. **Update your environment variables:**
 
-# Frontend 
-- After making a clone to your local 
-- open the folder `ShitPost` in your favorite code editor
+    Configure your database and Redis settings in the `.env` file.
 
-```
-cd Client
-yarn install
-yarn dev
+4. **Install dependencies and start the backend:**
 
-``` 
+    ```bash
+    yarn install
+    yarn watch
+    yarn dev
+    ```
 
-## Yay ! 
-your are done setting up now you can test out things and enjoy it
+### Frontend Setup
 
+1. **Navigate to the client directory:**
 
-<p>
+    ```bash
+    cd client
+    ```
+
+2. **Install dependencies and start the frontend :**
+
+    ```bash
+    yarn install
+    yarn dev
+    ```
+
+### You're All Set!
+
+Your local setup is now complete. Explore the features and enjoy the experience!
+
+## Show Your Support
+
+If you found this project helpful, consider giving it a ⭐️ on GitHub.
+
+<p align="center">
   <a href="https://twitter.com/Majjikishore1" target="_blank">
     <img alt="Twitter: Majjikishore1" src="https://img.shields.io/twitter/follow/Majjikishore1.svg?style=social" />
   </a>
 </p>
 
-> a redit clone
-
-# Show your support
-
-Give a ⭐️ if this project helped you!
-
+---
